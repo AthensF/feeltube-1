@@ -1,0 +1,13 @@
+# API Keys and Secrets
+config.js
+
+# System Files
+.DS_Store
+.vscode/
+*.log
+
+# Build artifacts
+*.zip
+
+# Optional files
+notes.txt

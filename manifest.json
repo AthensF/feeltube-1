@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "FeelTube - YouTube Video Tagger",
-  "version": "1.0.3",
-  "description": "Tags YouTube video titles on the home page",
+  "version": "1.0.4",
+  "description": "Tags YouTube video titles with AI-generated emotion tags",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.openai.com/*"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -10,7 +16,7 @@
         "*://m.youtube.com/*",
         "*://*.youtube.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["config.js", "content.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
     }
