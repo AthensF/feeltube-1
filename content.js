@@ -1,5 +1,3 @@
-console.log('[FeelTube] Extension loaded');
-
 // ==================== CONFIGURATION ====================
 // CONFIG is loaded from config.js (see manifest.json)
 // To set up: Copy config.example.js to config.js and add your API key
@@ -17,13 +15,10 @@ function loadCache() {
       const now = Date.now();
       if (data.timestamp && (now - data.timestamp) < CONFIG.CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000) {
         emotionCache = data.cache || {};
-        console.log('[FeelTube] Loaded cache with', Object.keys(emotionCache).length, 'entries');
-      } else {
-        console.log('[FeelTube] Cache expired, starting fresh');
       }
     }
   } catch (e) {
-    console.error('[FeelTube] Error loading cache:', e);
+    console.error('[FeelTube] Cache error:', e.message);
   }
 }
 
@@ -35,7 +30,7 @@ function saveCache() {
       timestamp: Date.now()
     }));
   } catch (e) {
-    console.error('[FeelTube] Error saving cache:', e);
+    console.error('[FeelTube] Cache save error:', e.message);
   }
 }
 
@@ -43,11 +38,8 @@ function saveCache() {
 async function getEmotionTags(videoTitle) {
   // Check cache first
   if (emotionCache[videoTitle]) {
-    console.log('[FeelTube] Cache hit for:', videoTitle);
     return emotionCache[videoTitle];
   }
-
-  console.log('[FeelTube] Calling OpenAI for:', videoTitle);
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -84,11 +76,10 @@ async function getEmotionTags(videoTitle) {
     emotionCache[videoTitle] = emotions;
     saveCache();
 
-    console.log('[FeelTube] Got emotions:', emotions);
     return emotions;
 
   } catch (error) {
-    console.error('[FeelTube] Error calling OpenAI:', error);
+    console.error('[FeelTube] API error:', error.message);
     return 'Curiosity | Interest | Wonder'; // Fallback
   }
 }
@@ -116,10 +107,8 @@ async function tagTitle(titleElement) {
     titleElement.style.opacity = '1';
     titleElement.style.fontWeight = 'normal';
 
-    console.log('[FeelTube] Tagged:', originalText, '→', emotions);
-
   } catch (error) {
-    console.error('[FeelTube] Error tagging title:', error);
+    console.error('[FeelTube] Error tagging:', error.message);
     // Revert to original on error
     titleElement.textContent = originalText;
     titleElement.style.opacity = '1';
@@ -140,32 +129,28 @@ function tagAllTitles() {
     'ytm-compact-video-renderer h3 span',
     '.compact-media-item-headline'
   ] : [
-    // Desktop YouTube selectors
-    'ytd-rich-item-renderer h3 a#video-title',
-    'ytd-rich-item-renderer #video-title',
-    'ytd-video-renderer h3 a#video-title',
-    'ytd-grid-video-renderer h3 a#video-title'
+    // Desktop YouTube selectors (2024+ layout)
+    'a.yt-lockup-metadata-view-model__title',
+    // Legacy fallback selectors
+    'ytd-video-renderer #video-title',
+    '#video-title:not([data-feeltube-tagged])'
   ];
-
-  console.log(`[FeelTube] Running on ${isMobile ? 'MOBILE' : 'DESKTOP'} YouTube`);
 
   selectors.forEach(selector => {
     const titles = document.querySelectorAll(selector);
-    titles.forEach(tagTitle); // tagTitle is now async, but forEach doesn't wait
+    titles.forEach(tagTitle);
   });
 }
 
 // ==================== INITIALIZATION ====================
 function init() {
-  console.log('[FeelTube] Initializing on:', window.location.pathname);
-
   // Load cache first
   loadCache();
 
   // Check if API key is configured
   if (CONFIG.OPENAI_API_KEY === 'YOUR_API_KEY_HERE') {
-    console.error('[FeelTube] ⚠️  Please configure your OpenAI API key in content.js');
-    console.error('[FeelTube] Edit the OPENAI_API_KEY in the CONFIG object');
+    console.error('[FeelTube] ⚠️  API key not configured. Copy config.example.js to config.js and add your OpenAI API key.');
+    return;
   }
 
   // Initial tagging with delay to ensure DOM is ready
@@ -193,8 +178,6 @@ function init() {
     childList: true,
     subtree: true
   });
-
-  console.log('[FeelTube] Observer started');
 }
 
 // Start when DOM is ready
