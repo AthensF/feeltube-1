@@ -1,0 +1,9 @@
+/* FeelTube - Video Title Tags */
+
+/* Display tag using CSS ::before pseudo-element */
+#video-title[data-feeltube-tag]::before {
+  content: "[" attr(data-feeltube-tag) "] ";
+  font-weight: bold;
+  color: #ff6b6b;
+  margin-right: 4px;
+}

@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "FeelTube - YouTube Video Tagger",
+  "version": "1.0.3",
+  "description": "Tags YouTube video titles on the home page",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.youtube.com/*",
+        "*://m.youtube.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
